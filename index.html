@@ -68,7 +68,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .emotes button:active{transform:scale(.95)}
 .emotes svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .vol-row{display:flex;align-items:center;gap:10px}.vol-row input{flex:1;min-width:0;accent-color:#c8a0ff}.vol-row output{width:2.5em;text-align:right;font-variant-numeric:tabular-nums;color:var(--gold)}
-.solo-note{position:fixed;left:50%;top:42%;transform:translate(-50%,-50%);z-index:60;padding:18px 22px;border-radius:18px;background:rgba(24,18,48,.92);color:#f6eeff;border:1px solid rgba(255,255,255,.18);box-shadow:0 10px 40px rgba(0,0,0,.45);text-align:center;max-width:calc(100vw - 48px);font-size:15px;line-height:1.5;word-break:keep-all;width:max-content;pointer-events:none;animation:soloIn .25s ease-out}@keyframes soloIn{from{opacity:0;transform:translate(-50%,-44%)}to{opacity:1;transform:translate(-50%,-50%)}}
+.solo-note{position:fixed;left:50%;top:42%;transform:translate(-50%,-50%);z-index:60;padding:18px 22px;border-radius:18px;background:rgba(24,18,48,.92);color:#f6eeff;border:1px solid rgba(255,255,255,.18);box-shadow:0 10px 40px rgba(0,0,0,.45);text-align:center;max-width:calc(100vw - 48px);font-size:15px;line-height:1.5;word-break:keep-all;width:min(330px,calc(100vw - 48px));box-sizing:border-box;pointer-events:none;animation:soloIn .25s ease-out}@keyframes soloIn{from{opacity:0;transform:translate(-50%,-44%)}to{opacity:1;transform:translate(-50%,-50%)}}
 .gl-lost{position:fixed;inset:0;z-index:90;display:grid;place-content:center;justify-items:center;gap:8px;background:#0b0a1c;color:#f0e6ff;text-align:center}.gl-lost span{opacity:.7;font-size:13px}
 .mega-btn{flex:none;width:44px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.08);font-size:20px;line-height:1;cursor:pointer}.mega-btn.on{background:#ffe14d;border-color:#ffe14d;box-shadow:0 0 14px rgba(255,225,77,.6)}
 .mega-ban{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 66px);z-index:58;display:block;text-align:center;width:max-content;max-width:min(640px,calc(100% - 32px));box-sizing:border-box;padding:10px 18px;border-radius:16px;background:#ffe14d;color:#111;font-size:15.5px;font-weight:700;line-height:1.35;box-shadow:0 6px 22px rgba(0,0,0,.35),0 0 24px rgba(255,225,77,.45);pointer-events:none}
@@ -362,7 +362,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
     <div class="rooms" id="myMusicGrid"></div>
   </div>
 </div>
-<div class="solo-note" id="soloNote" hidden><b>소링타로가 공유한 링크로 방문해 주세요</b></div>
+<div class="solo-note" id="soloNote" hidden><b>소링카페 방문은 운영자가 공유한 링크로 방문해 주세요</b></div>
 <div class="scrim" id="placesSheet" hidden>
   <div class="sheet glass" role="dialog" aria-labelledby="placesTitle">
     <button class="x" type="button" data-close aria-label="닫기">×</button>
@@ -602,14 +602,15 @@ let renderer;
 try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' }); }
 catch (e) { document.body.insertAdjacentHTML('beforeend','<div class="err">이 기기에서는 3D 화면을 열 수 없어요. 다른 브라우저나 기기로 들어와 주세요.</div>'); throw e; }
 const MOBILE = Math.min(innerWidth, innerHeight) < 600 || /Android|iPhone|iPad/i.test(navigator.userAgent);
-const LITEG = MOBILE && GARDENISH;   // phone lounge: the biggest scene — fewer blades/leaves, smaller textures, sharpness 1x, small far things hidden sooner
+const LITEG = MOBILE && GARDENISH;
+const LITEH = MOBILE && PAGE === 'hall';   // phone live hall: up to 100 cats — only the nearest are drawn in full, far ones as simple shapes, fewer name tags   // phone lounge: the biggest scene — fewer blades/leaves, smaller textures, sharpness 1x, small far things hidden sooner
 // phones can drop the GL context when memory runs short: keep it recoverable and tell the visitor instead of leaving a black screen
 function glDown(){ if (window.__leaving) return; const n = document.getElementById('glLost'); if (!n || !n.hidden) return; n.hidden = false; setTimeout(() => { if (!window.__leaving && renderer.getContext().isContextLost()) location.reload(); }, 6000); }
 canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); glDown(); }, false);
 document.getElementById('glReload').addEventListener('click', () => location.reload());
 // the picture stopped updating for a while even though the page is open (frozen GPU / silent black screen): offer the reload button
 window.__lastFrame = performance.now();
-setInterval(() => { if (!window.__leaving && !window.__asleep && !document.hidden && window.__started && performance.now() - window.__lastFrame > 5000) glDown(); }, 1500);
+setInterval(() => { if (!window.__leaving && !window.__asleep && !document.hidden && window.__started && performance.now() - window.__lastFrame > 8000) glDown(); }, 1500);
 document.addEventListener('visibilitychange', () => { window.__lastFrame = performance.now(); });
 // some phones switch the graphics off without telling the page: check every 2 s and reload if it happened
 setInterval(() => { try { if (!window.__leaving && !document.hidden && renderer.getContext().isContextLost()) glDown(); } catch(_) {} }, 2000);
@@ -621,7 +622,7 @@ const QUALITY = {
   high:   { dpr: 2,    bloom: true,  mirror: .6,  shadow: 2048 },
   medium: { dpr: 1.5,  bloom: true,  mirror: .32, shadow: 1024 },
   low:    { dpr: 1,    bloom: false, mirror: 0,   shadow: 0 },
-  phone:  { dpr: LITEG ? 1 : 1.25, bloom: true,  mirror: 0,   shadow: 0 }   // auto on phones: keeps the glow, drops the costly reflection and shadow passes
+  phone:  { dpr: LITEG || LITEH ? 1 : 1.25, bloom: true,  mirror: 0,   shadow: 0 }   // auto on phones: keeps the glow, drops the costly reflection and shadow passes
 };
 const prefs = Object.assign({ season: 'auto', time: 'auto', weather: 'auto', quality: 'auto' }, store.get('tl3-scene') || {});
 const qualityName = () => prefs.quality === 'auto' ? (MOBILE ? 'phone' : 'high') : prefs.quality;
@@ -693,9 +694,9 @@ const hallSign = (() => { // live status board in front of the moon temple door
     g.strokeStyle = on ? 'rgba(255,140,170,.95)' : 'rgba(240,207,138,.9)'; g.lineWidth = 6; g.stroke();
     if (on){ g.shadowColor = '#ff4d6d'; g.shadowBlur = 24; g.fillStyle = '#ff4d6d'; g.beginPath(); g.arc(110, 120, 22, 0, 7); g.fill(); g.shadowBlur = 0; }
     g.fillStyle = on ? '#ffe4ec' : '#f6dca0'; g.font = `800 ${on ? 78 : 60}px "Nanum Myeongjo", serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
-    g.fillText(on ? '라이브 방송 중입니다' : '현재 라이브 방송을 하고 있지 않습니다', on ? 545 : 512, 124, on ? 780 : 900); t.needsUpdate = true; }
+    g.fillText(on ? '현재 라이브 방송 중입니다' : '현재 라이브를 하고 있지 않습니다', on ? 545 : 512, 124, on ? 820 : 900); t.needsUpdate = true; }
   let last = false; const draw2 = on => { last = on; draw(on); };
-  document.fonts && document.fonts.load('800 60px "Nanum Myeongjo"', '현재 라이브 방송을 하고 있지 않습니다 라이브 방송 중입니다').then(() => { cur = null; draw(last); }).catch(() => {});
+  document.fonts && document.fonts.load('800 60px "Nanum Myeongjo"', '현재 라이브를 하고 있지 않습니다 현재 라이브 방송 중입니다').then(() => { cur = null; draw(last); }).catch(() => {});
   return { sp, draw: draw2 };
 })();
 function labelSprite(text, w = 2.8){
@@ -714,7 +715,7 @@ function labelSprite(text, w = 2.8){
 await __yield();
 /* ---------------- textures (generated at high resolution) ---------------- */
 function canvasTex(size, draw, { repeat = 1, srgb = true } = {}){
-  const c = document.createElement('canvas'), px = MOBILE ? Math.min(size, LITEG ? 512 : 768) : size; c.width = c.height = px; const g0 = c.getContext('2d'); if (px !== size) g0.scale(px/size, px/size); // phones: same drawing at a lighter resolution
+  const c = document.createElement('canvas'), px = MOBILE ? Math.min(size, LITEG || LITEH ? 512 : 768) : size; c.width = c.height = px; const g0 = c.getContext('2d'); if (px !== size) g0.scale(px/size, px/size); // phones: same drawing at a lighter resolution
   // iPhones cap the total memory of all canvases on a page; scratch canvases used while drawing are emptied right away
   const made = [], ce = document.createElement; document.createElement = function(t, o){ const e = ce.call(document, t, o); if (String(t).toLowerCase() === 'canvas') made.push(e); return e; };
   try { draw(g0, size); } finally { document.createElement = ce; }
@@ -4098,8 +4099,10 @@ const SITE = { cafe: ['소링카페', '카페 안으로 들어가요.', () => CO
 function siteUrl(kind){ try { const u = new URL(SITE[kind][2](), location.href), cur = new URL(location.href).searchParams; for (const k of ['host', 'full']) if (cur.has(k)) u.searchParams.set(k, ''); return u.toString().replace(/=(&|$)/g, '$1'); } catch(_) { return SITE[kind][2](); } }
 let linkShownAt = 0;
 let soloT = 0;
-function soloNote(){ const n = $('soloNote'); n.hidden = false; n.style.animation = 'none'; void n.offsetWidth; n.style.animation = ''; clearTimeout(soloT); soloT = setTimeout(() => n.hidden = true, 5000); }
-function openLink(kind){ if (SOLO){ if (GARDENISH && (kind === 'cafe' || kind === 'hall')) soloNote(); return; } if (!SITE[kind]) return; linkShownAt = Date.now(); $('linkTitle').textContent = SITE[kind][0]; $('linkText').textContent = SITE[kind][1]; const a = $('linkGo'); a.href = siteUrl(kind); a.removeAttribute('target'); a.textContent = '이동하기'; $('linkUrl').textContent = a.href; openSheet('linkSheet'); }
+function soloNote(kind){ const n = $('soloNote'); n.querySelector('b').textContent = (kind === 'hall' ? '라이브홀' : '소링카페') + ' 방문은 운영자가 공유한 링크로 방문해 주세요'; n.hidden = false; n.style.animation = 'none'; void n.offsetWidth; n.style.animation = ''; clearTimeout(soloT); soloT = setTimeout(() => n.hidden = true, 5000); }
+function openLink(kind){ if (SOLO){ if (GARDENISH && (kind === 'cafe' || kind === 'hall')){ // only when standing right in front of it, not when tapped from far away
+    const p = me.mesh.position, d = kind === 'cafe' ? Math.hypot(p.x - CAFE.x, p.z - (CAFE.z - CAFE.R - 3)) : Math.hypot(p.x - PLAT.x, p.z - PLAT.z);
+    if (d < (kind === 'cafe' ? 12 : PLAT.r + 6)) soloNote(kind); } return; } if (!SITE[kind]) return; linkShownAt = Date.now(); $('linkTitle').textContent = SITE[kind][0]; $('linkText').textContent = SITE[kind][1]; const a = $('linkGo'); a.href = siteUrl(kind); a.removeAttribute('target'); a.textContent = '이동하기'; $('linkUrl').textContent = a.href; openSheet('linkSheet'); }
 // after opening another site in a new tab, this tab lets go of its graphics, sound and connection so the phone has room for the new one
 function sleepTab(){ if (window.__asleep) return; window.__asleep = window.__leaving = true;
   try { if (net.sb) net.sb.removeAllChannels(); } catch(_) {}
@@ -4325,7 +4328,7 @@ function renderRooms(){
 $('hud').addEventListener('click', () => { if (PAGE === 'hall'){ toast('라이브 홀', ' 은 모든 방 손님이 한곳에 모이는 곳이에요 (최대 ' + live.state.cap + '명).'); return; } renderRooms(); openSheet('roomsSheet'); });
 
 function isBossId(id){ return (id === myId && live.isHost) || (!!live.state.hostPid && id === live.state.hostPid); }
-function refreshBoss(){ for (const [id, p] of people) p.setBoss(isBossId(id));
+function refreshBoss(){ for (const [id, p] of people){ p.setBoss(isBossId(id)); if (p.boss && p !== me && p.nick !== OWNER_NICK) p.rename(OWNER_NICK, p.color); }
   if (live.isHost && me && profile.nick !== OWNER_NICK){ profile.nick = OWNER_NICK; me.rename(OWNER_NICK, profile.color); net.retrack(); setHud(); }
   const host = live.isHost && !!me; $('setWrap').hidden = !host; $('kakaoTop').hidden = host;
   for (const id of ['flyBtn', 'sayBtn', 'wishBoxBtn']) $(id).hidden = !host; $('emotes').classList.toggle('host', !!host);
@@ -4356,6 +4359,12 @@ function renderMyMusic(){ const g = $('myMusicGrid'); g.innerHTML = '';
     b.onclick = () => { myCafeMusic = i; store.set('tl3-mymusic', i); renderMyMusic(); toast('음악', ' ' + (i < 0 ? '카페 기본 음악으로 돌아왔어요.' : n + '(으)로 바꿨어요. 내 화면에서만 바뀌어요.')); }; g.appendChild(b); }); }
 $('myMusicBtn').addEventListener('click', () => { renderMyMusic(); openSheet('myMusicSheet'); });
 if (PAGE === 'cafe') $('myMusicBtn').hidden = false;
+// café on a phone: the extra 음악 button would push the weather pill onto a second row — put it in the top row, next to 1:1 상담
+function cafeHudLayout(){ if (PAGE !== 'cafe' || innerWidth > 560) return; const sb = $('sceneBtn'), k = $('kakaoTop'), hud = $('hud');
+  sb.style.position = 'fixed'; sb.style.top = getComputedStyle(k).top; sb.style.zIndex = 5;
+  const kw = k.hidden ? 0 : k.offsetWidth + 8; sb.style.right = `calc(env(safe-area-inset-right,0px) + ${12 + kw}px)`;
+  hud.style.maxWidth = Math.max(110, innerWidth - 12 - kw - sb.offsetWidth - 8 - 12) + 'px'; }
+if (PAGE === 'cafe'){ addEventListener('resize', cafeHudLayout); setInterval(cafeHudLayout, 1500); setTimeout(cafeHudLayout, 0); }
 if (ALL) setInterval(() => { try { $('myMusicBtn').hidden = !inCafe(me.mesh.position.x, me.mesh.position.z, 0); } catch(_) {} }, 1000);
 function setCafe(m, l){ cafeSet.music = Math.max(0, Math.min(CAFE_MUSIC.length - 1, m | 0)); cafeSet.light = Math.max(0, Math.min(2, l | 0)); $('cafeMusicSel').value = cafeSet.music; $('cafeLightSel').value = cafeSet.light; }
 function saveCafe(){ const m = +$('cafeMusicSel').value, l = +$('cafeLightSel').value; setCafe(m, l); if (!live.isHost) return; hostSave({ cafeMusic: m, cafeLight: l }, true);
@@ -4371,7 +4380,9 @@ function syncPeers(st){
   for (const key in st){
     if (key === myId || !Array.isArray(st[key]) || !st[key].length) continue;
     const s = { ...st[key][st[key].length - 1] }; seen.add(key);
-    if (cleanNick(s.nick) === OWNER_NICK && !isBossId(key)) s.nick = '손님';
+    if (cleanNick(s.nick) === OWNER_NICK && !isBossId(key)){ s.nick = '손님';
+      // someone using the owner's name we can't place yet: ask the owner's page for the live state (it carries the owner's id), at most every 5 s
+      if (!live.isHost && Date.now() - (live.helloAt || 0) > 5000){ live.helloAt = Date.now(); setTimeout(() => liveRequest({ t: 'hello' }), 300); } }
     const p = people.get(key);
     if (!p){ const hasPos = typeof s.x === 'number'; if (!hasPos){ s.x = spawn.x; s.z = spawn.z; } const np = new Person(key, s, false); people.set(key, np); np.placed = hasPos;
       if (!hasPos){ np.mesh.visible = false; setTimeout(() => { if (!np.placed){ np.placed = true; np.mesh.visible = true; } }, 3500); }
@@ -5021,7 +5032,7 @@ if (PAGE === 'hall' || ALL) {
   const gate = new THREE.Group(); gate.position.set(cx, 0, cz - R + 3.2); H.add(gate);
   const GA = archGeometry(2.4, 3.2, 2.4, .35, .5); gate.add(mesh(GA.geo, templeMat, 0, 0, 0));
   const portal = new THREE.Mesh(new THREE.CircleGeometry(2.05, 48), new THREE.MeshBasicMaterial({ color: new THREE.Color(.8, .9, 1.4), transparent: true, opacity: .35, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })); portal.position.y = 3.1; gate.add(portal);
-  const gl = labelSprite('라운지로 돌아가기', 3.4); gl.position.y = 6.6; gate.add(gl);
+  if (!SOLO){ const gl = labelSprite('라운지로 돌아가기', 3.4); gl.position.y = 6.6; gate.add(gl); }
   gate.traverse(m => { if (m.isMesh){ m.userData.pick = 'exit'; pickables.push(m); } });
   for (let i=0;i<120;i++){ const a = rnd(0, Math.PI*2); sp.push([cx + Math.cos(a)*rnd(.3, 2), 3.1 + Math.sin(a)*rnd(.3, 2), cz - R + 3.2, pick([0xffffff, 0xc8e8ff]), rnd(.05, .1)]); }
   H.add(makeSparks(sp));
@@ -5113,7 +5124,7 @@ function liveRequest(p){
   if (live.reqCh) live.reqCh.send({ type: 'broadcast', event: 'req', payload: p }).catch(() => {});
   // the same request also goes through the hall's own channel (the one everyone's movement already uses),
   // so it reaches the owner even if the separate request channel is blocked by the server's access rules
-  if (['apply', 'cancel', 'pick', 'hello'].includes(p.t) && net.live && net.ch && net.topic === 'live-hall') net.ch.send({ type: 'broadcast', event: 'req', payload: { id: myId, ...p } }).catch(() => {});
+  if (['apply', 'cancel', 'pick', 'hello'].includes(p.t) && net.live && net.ch && (net.topic === 'live-hall' || p.t === 'hello')) net.ch.send({ type: 'broadcast', event: 'req', payload: { id: myId, ...p } }).catch(() => {});
 }
 await __yield();
 /* ---- host side ---- */
@@ -5461,7 +5472,7 @@ $('loginGo').addEventListener('click', async () => {
 });
 $('previewHost').addEventListener('click', () => { live.isHost = true; live.previewHost = true; live.state.hostPid = myId; refreshBoss(); if (me){ me.setTarget(HS.x - 3, HS.z, true); me.sitAt(HOST_SEAT); } renderLive(); toast('미리보기', ' 방장 화면이에요. 서버 없이 이 화면에서만 동작해요.'); });
 setInterval(() => { if (live.inHall && live.state.open && live.state.mode === 'cards' && live.state.cards.phase === 'open'){ renderLive(); } }, 500);
-if (window.__TL_TEST) window.__tl = { __load, SEATS, get PERF(){ return PERF; }, get LP(){ return LP; }, focus(x, y, z){ camFocus.set(x, y, z); LP.t = -9; lightPoolFrame(0, 1); }, perfCull, people, renderer, camera, composer, get Q(){ return Q; }, get PAGE(){ return PAGE; }, get PRUNED(){ return [PRUNED, PRUNE_FREED]; }, WALK, AU, SEATS, cafeTables, setTreeStyle, takeItem, gotItem, enterHall, leaveHall, openLiveBok, live, net, hostNext, makeAvatar, scene, openLink, get pickables(){ return pickables; }, get me(){ return me; }, cam(d, p, y){ camDist = d; camPitch = p; if (y !== undefined) camYaw = y; } };
+if (window.__TL_TEST) window.__tl = { __load, SEATS, get PERF(){ return PERF; }, get LP(){ return LP; }, focus(x, y, z){ camFocus.set(x, y, z); LP.t = -9; lightPoolFrame(0, 1); }, perfCull, people, renderer, camera, composer, get Q(){ return Q; }, get PAGE(){ return PAGE; }, get PRUNED(){ return [PRUNED, PRUNE_FREED]; }, WALK, AU, SEATS, cafeTables, setTreeStyle, takeItem, gotItem, enterHall, leaveHall, openLiveBok, live, net, hostNext, makeAvatar, scene, openLink, Person, get hallImp(){ return hallImp; }, get pickables(){ return pickables; }, get me(){ return me; }, cam(d, p, y){ camDist = d; camPitch = p; if (y !== undefined) camYaw = y; } };
 
 await __yield();
 /* ---------------- intro ---------------- */
@@ -5536,9 +5547,10 @@ function prunePage(){ if (ALL) return 0; const rm = new Set(), W = new THREE.Vec
 }
 const PRUNED = prunePage();
 if (PAGE === 'garden' || ALL){
-  try { scene.remove(hallSign.sp); } catch(_) {}
-  { const cl = labelSprite('소링카페', 4.2); cl.position.set(CAFE.x, 17.5, CAFE.z - CAFE.R + 2); scene.add(cl);
-  const hl = labelSprite('라이브홀', 3.6); hl.position.set(PLAT.x, PLAT.y + 5.2, PLAT.z + 8.6); scene.add(hl); }
+  const LINKED = PAGE === 'garden' && !SOLO;   // linked phone lounge: keeps the live status board, no name labels on the buildings
+  if (!LINKED) try { scene.remove(hallSign.sp); } catch(_) {}
+  if (!LINKED){ const cl = labelSprite('소링카페', 5.6); cl.position.set(CAFE.x, 7.2, CAFE.z - CAFE.R - 3.9); scene.add(cl);
+  const hl = labelSprite('라이브홀', 4.8); hl.position.set(PLAT.x, PLAT.y + 5.2, PLAT.z + 8.6); scene.add(hl); }
   // an invisible tap target over the whole café building
   const hit = new THREE.Mesh(new THREE.CylinderGeometry(CAFE.R + .6, CAFE.R + .6, 16, 24), new THREE.MeshBasicMaterial({ visible: false })); if (!ALL){ hit.position.set(CAFE.x, 8, CAFE.z); hit.userData.pick = 'cafelink'; scene.add(hit); pickables.push(hit); }
 }
@@ -5675,6 +5687,30 @@ if (false){ const tryGo = () => { const b = $('goBtn'); if (b && b.dataset.ready
 const clock = new THREE.Clock();
 const v3 = new THREE.Vector3();
 let introT = 0;
+// phone live hall: nearest FULL cats keep every detail, the rest become two shared simple shapes (2 draw calls for all of them)
+const HALL_FULL = 25, HALL_TAGS = 10, HALL_TAG_D = 16;
+const hallImp = LITEH ? (() => {
+  const body = new THREE.InstancedMesh(new THREE.SphereGeometry(.42, 10, 8), new THREE.MeshStandardMaterial({ roughness: .8 }), 100);
+  const head = new THREE.InstancedMesh(new THREE.SphereGeometry(.3, 10, 8), new THREE.MeshStandardMaterial({ roughness: .8 }), 100);
+  for (const m of [body, head]){ m.count = 0; m.frustumCulled = false; m.castShadow = m.receiveShadow = false; scene.add(m); }
+  return { body, head, list: [], o: new THREE.Object3D(), c: new THREE.Color() }; })() : null;
+function hallLod(){
+  const others = [...people.values()].filter(p => !p.isMe), sid = live.state && live.state.seated && live.state.seated.id;
+  others.sort((a, b) => a.mesh.position.distanceToSquared(camFocus) - b.mesh.position.distanceToSquared(camFocus));
+  const lite = []; let full = 0, tags = 0;
+  for (const p of others){ const placed = p.placed !== false, vip = p.boss || p.id === sid;
+    if (placed && (vip || full < HALL_FULL)){ p.mesh.visible = true; if (!vip) full++; } else { p.mesh.visible = false; if (placed) lite.push(p); }
+    const near = p.mesh.position.distanceTo(camFocus) < HALL_TAG_D;
+    p.tagOk = vip || (p.mesh.visible && near && tags < HALL_TAGS); if (p.tagOk && !vip) tags++; }
+  hallImp.list = lite.slice(0, 100);
+  hallImp.list.forEach((p, i) => { const d = decodeLook(cleanColor(p.color)), cp = CAPES[d.cape], co = COATS[d.coat];
+    hallImp.c.set(cp ? cp.bg[0] : '#4a2a8a'); hallImp.body.setColorAt(i, hallImp.c); hallImp.c.set(co ? co.base : '#8c8e98'); hallImp.head.setColorAt(i, hallImp.c); });
+  for (const m of [hallImp.body, hallImp.head]) if (m.instanceColor) m.instanceColor.needsUpdate = true; }
+function hallImpFrame(){ const { body, head, list, o } = hallImp; let n = 0;
+  for (const p of list){ if (!people.has(p.id)) continue; const q = p.mesh.position, sc = p.mesh.scale.x || 1;
+    o.position.set(q.x, q.y + .45*sc, q.z); o.scale.set(sc, 1.15*sc, sc); o.rotation.set(0, 0, 0); o.updateMatrix(); body.setMatrixAt(n, o.matrix);
+    o.position.set(q.x, q.y + 1.05*sc, q.z); o.scale.set(sc, sc, sc); o.updateMatrix(); head.setMatrixAt(n, o.matrix); n++; }
+  body.count = head.count = n; body.instanceMatrix.needsUpdate = head.instanceMatrix.needsUpdate = true; }
 function frame(){ window.__lastFrame = performance.now();
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
   for (const p of people.values()) p.update(dt, t);
@@ -5700,7 +5736,9 @@ function frame(){ window.__lastFrame = performance.now();
   updatePrecip(dt, t, camFocus); perfFrame(t); lightPoolFrame(t, dt);
   if (!window.__tlNoRender){ if (Q.bloom) composer.render(dt); else renderer.render(scene, camera); }
 
-  if (t - (window.__lodT || 0) > .5){ window.__lodT = t; const others = [...people.values()].filter(p => !p.isMe);
+  if (LITEH && t - (window.__lodT || 0) > .5){ window.__lodT = t; hallLod(); }
+  if (LITEH) hallImpFrame();
+  else if (t - (window.__lodT || 0) > .5){ window.__lodT = t; const others = [...people.values()].filter(p => !p.isMe);
     if (others.length > 40){ others.sort((a, b) => a.mesh.position.distanceToSquared(camFocus) - b.mesh.position.distanceToSquared(camFocus)); others.forEach((p, i) => { p.mesh.visible = p.placed !== false && (i < 40 || p.boss); }); } else others.forEach(p => { p.mesh.visible = p.placed !== false; });
     if (PAGE === 'garden') for (const p of others) if (Math.hypot(p.mesh.position.x - CAFE.x, p.mesh.position.z - CAFE.z) < CAFE.R - .5) p.mesh.visible = false;
     if (PAGE === 'mini') for (const p of others) if (MINI_OUT(p.mesh.position.x, p.mesh.position.z)) p.mesh.visible = false;
@@ -5708,7 +5746,7 @@ function frame(){ window.__lastFrame = performance.now();
   const w = innerWidth, h = innerHeight;
   for (const p of people.values()){
     v3.copy(p.mesh.position); v3.y += p.boss ? 2.75 : 2.0; v3.project(camera);
-    const vis = p.mesh.visible && v3.z < 1 && Math.abs(v3.x) < 1.2 && Math.abs(v3.y) < 1.2;
+    const vis = p.mesh.visible && (!LITEH || p.tagOk !== false) && v3.z < 1 && Math.abs(v3.x) < 1.2 && Math.abs(v3.y) < 1.2;
     p.tag.style.display = vis ? '' : 'none';
     if (vis) p.tag.style.transform = `translate(${(v3.x*.5+.5)*w}px,${(-v3.y*.5+.5)*h}px) translate(-50%,-100%)`;
     if (!p.bub.hidden){
