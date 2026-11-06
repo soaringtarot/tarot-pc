@@ -68,6 +68,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 .emotes button:active{transform:scale(.95)}
 .emotes svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
 .vol-row{display:flex;align-items:center;gap:10px}.vol-row input{flex:1;min-width:0;accent-color:#c8a0ff}.vol-row output{width:2.5em;text-align:right;font-variant-numeric:tabular-nums;color:var(--gold)}
+.solo-note{position:fixed;left:50%;top:42%;transform:translate(-50%,-50%);z-index:60;padding:18px 22px;border-radius:18px;background:rgba(24,18,48,.92);color:#f6eeff;border:1px solid rgba(255,255,255,.18);box-shadow:0 10px 40px rgba(0,0,0,.45);text-align:center;max-width:calc(100vw - 48px);font-size:15px;line-height:1.5;word-break:keep-all;width:max-content;pointer-events:none;animation:soloIn .25s ease-out}@keyframes soloIn{from{opacity:0;transform:translate(-50%,-44%)}to{opacity:1;transform:translate(-50%,-50%)}}
 .gl-lost{position:fixed;inset:0;z-index:90;display:grid;place-content:center;justify-items:center;gap:8px;background:#0b0a1c;color:#f0e6ff;text-align:center}.gl-lost span{opacity:.7;font-size:13px}
 .mega-btn{flex:none;width:44px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.08);font-size:20px;line-height:1;cursor:pointer}.mega-btn.on{background:#ffe14d;border-color:#ffe14d;box-shadow:0 0 14px rgba(255,225,77,.6)}
 .mega-ban{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 66px);z-index:58;display:block;text-align:center;width:max-content;max-width:min(640px,calc(100% - 32px));box-sizing:border-box;padding:10px 18px;border-radius:16px;background:#ffe14d;color:#111;font-size:15.5px;font-weight:700;line-height:1.35;box-shadow:0 6px 22px rgba(0,0,0,.35),0 0 24px rgba(255,225,77,.45);pointer-events:none}
@@ -185,6 +186,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 <button class="hud-tl glass" id="hud" type="button" aria-label="방 목록 열기"><span class="dot"></span><b>밤의 타로 라운지</b><span id="hudRoom">혼자 둘러보는 중</span><span class="cnt" id="hudCnt"></span><span class="hud-live" id="hudLive" hidden></span></button>
 <div class="hud-tr">
   <button class="pill glass" id="soundBtn" type="button" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/></svg><span id="soundLabel">소리 켬</span></button>
+  <button class="pill glass" id="myMusicBtn" type="button" hidden aria-label="음악 고르기"><svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/></svg>음악</button>
   <button class="pill glass" id="placesBtn" type="button" aria-label="장소 이동"><svg viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>장소</button>
   <button class="pill glass" id="sceneBtn" type="button" aria-label="풍경 설정 열기"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg><span id="sceneLabel">밤</span></button>
   <button class="pill glass coffee-pill" id="coffeeBtn" type="button" hidden><svg viewBox="0 0 24 24"><path d="M5 9h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4z"/><path d="M16 11h1.5a2 2 0 0 1 0 4H16"/><path d="M8 3c0 1.5 1 1.5 1 3M11 3c0 1.5 1 1.5 1 3"/></svg><span id="coffeeLabel">커피 마시기</span></button>
@@ -209,7 +211,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
 </nav>
 <div class="mega-ban" id="megaBan" hidden role="status" aria-live="polite"><span class="mi">📢</span><b>소링타로</b><span id="megaText"></span></div>
 <div class="gl-lost" id="sleepMask" hidden><b>새 창에서 열었어요</b><span>이 창은 쉬고 있어요. 새 창을 이용해 주세요.</span><button type="button" id="wakeBtn" class="go" style="margin-top:14px;pointer-events:auto">이 창 다시 열기</button></div>
-<div class="gl-lost" id="glLost" hidden><b>화면을 다시 불러오는 중이에요</b><span>잠시만 기다려 주세요</span></div>
+<div class="gl-lost" id="glLost" hidden><b>화면이 잠시 멈췄어요</b><span>아래 버튼을 누르면 다시 불러와요 (몇 초 뒤 자동으로 다시 불러와요)</span><button type="button" id="glReload" class="go" style="margin-top:14px">다시 불러오기</button></div>
 <div class="live-banner" id="liveBanner" hidden><b>라이브 방송이 시작되었습니다</b><span>달의 전당</span></div>
 
 <div class="live-top" id="liveTop" hidden>
@@ -352,6 +354,15 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{ou
   </div>
 </div>
 
+<div class="scrim" id="myMusicSheet" hidden>
+  <div class="sheet glass" role="dialog" aria-labelledby="myMusicTitle">
+    <button class="x" type="button" data-close aria-label="닫기">×</button>
+    <h2 id="myMusicTitle">내가 들을 음악</h2>
+    <p class="muted">고른 음악은 내 화면에서만 바뀌어요.</p>
+    <div class="rooms" id="myMusicGrid"></div>
+  </div>
+</div>
+<div class="solo-note" id="soloNote" hidden><b>소링타로가 공유한 링크로 방문해 주세요</b></div>
 <div class="scrim" id="placesSheet" hidden>
   <div class="sheet glass" role="dialog" aria-labelledby="placesTitle">
     <button class="x" type="button" data-close aria-label="닫기">×</button>
@@ -482,7 +493,8 @@ const $ = id => document.getElementById(id);
 // this file is built three times: index.html (정원·연못·기차역·달의 전당), cafe.html (소링 카페), hall.html (라이브 홀)
 const PAGE = 'pc';
 const GARDENISH = PAGE === 'garden' || PAGE === 'mini';
-const ALL = PAGE === 'pc';   // PC build: the whole world on one page — café and live hall are a walk away, no page change   // mini.html: card garden + wish pond + sacred tree + moon temple only (test build)
+const ALL = PAGE === 'pc';
+const SOLO = '0' === '1';   // stand-alone build: lounge, café and hall are separate sites with no links between them   // PC build: the whole world on one page — café and live hall are a walk away, no page change   // mini.html: card garden + wish pond + sacred tree + moon temple only (test build)
 // loading: build the world in slices so the page stays responsive, and show progress on the enter button
 const effects = [];
 const __load = { n: 0, total: 39 };
@@ -590,10 +602,17 @@ let renderer;
 try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' }); }
 catch (e) { document.body.insertAdjacentHTML('beforeend','<div class="err">이 기기에서는 3D 화면을 열 수 없어요. 다른 브라우저나 기기로 들어와 주세요.</div>'); throw e; }
 const MOBILE = Math.min(innerWidth, innerHeight) < 600 || /Android|iPhone|iPad/i.test(navigator.userAgent);
+const LITEG = MOBILE && GARDENISH;   // phone lounge: the biggest scene — fewer blades/leaves, smaller textures, sharpness 1x, small far things hidden sooner
 // phones can drop the GL context when memory runs short: keep it recoverable and tell the visitor instead of leaving a black screen
-canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); if (window.__leaving) return; const n = document.getElementById('glLost'); if (n) n.hidden = false; setTimeout(() => { if (!window.__leaving && renderer.getContext().isContextLost()) location.reload(); }, 3000); }, false);
+function glDown(){ if (window.__leaving) return; const n = document.getElementById('glLost'); if (!n || !n.hidden) return; n.hidden = false; setTimeout(() => { if (!window.__leaving && renderer.getContext().isContextLost()) location.reload(); }, 6000); }
+canvas.addEventListener('webglcontextlost', e => { e.preventDefault(); glDown(); }, false);
+document.getElementById('glReload').addEventListener('click', () => location.reload());
+// the picture stopped updating for a while even though the page is open (frozen GPU / silent black screen): offer the reload button
+window.__lastFrame = performance.now();
+setInterval(() => { if (!window.__leaving && !window.__asleep && !document.hidden && window.__started && performance.now() - window.__lastFrame > 5000) glDown(); }, 1500);
+document.addEventListener('visibilitychange', () => { window.__lastFrame = performance.now(); });
 // some phones switch the graphics off without telling the page: check every 2 s and reload if it happened
-setInterval(() => { try { if (!window.__leaving && !document.hidden && renderer.getContext().isContextLost()){ const n = document.getElementById('glLost'); if (n && n.hidden){ n.hidden = false; setTimeout(() => location.reload(), 2500); } } } catch(_) {} }, 2000);
+setInterval(() => { try { if (!window.__leaving && !document.hidden && renderer.getContext().isContextLost()) glDown(); } catch(_) {} }, 2000);
 // leaving the page (or it going into the back/forward cache): give the graphics memory back first; coming back from that cache reloads
 addEventListener('pagehide', e => { if (e.persisted){ window.__leaving = true; try { renderer.forceContextLoss(); } catch(_) {} } });
 addEventListener('pageshow', e => { if (e.persisted) location.reload(); });
@@ -602,7 +621,7 @@ const QUALITY = {
   high:   { dpr: 2,    bloom: true,  mirror: .6,  shadow: 2048 },
   medium: { dpr: 1.5,  bloom: true,  mirror: .32, shadow: 1024 },
   low:    { dpr: 1,    bloom: false, mirror: 0,   shadow: 0 },
-  phone:  { dpr: 1.25, bloom: true,  mirror: 0,   shadow: 0 }   // auto on phones: keeps the glow, drops the costly reflection and shadow passes
+  phone:  { dpr: LITEG ? 1 : 1.25, bloom: true,  mirror: 0,   shadow: 0 }   // auto on phones: keeps the glow, drops the costly reflection and shadow passes
 };
 const prefs = Object.assign({ season: 'auto', time: 'auto', weather: 'auto', quality: 'auto' }, store.get('tl3-scene') || {});
 const qualityName = () => prefs.quality === 'auto' ? (MOBILE ? 'phone' : 'high') : prefs.quality;
@@ -695,7 +714,7 @@ function labelSprite(text, w = 2.8){
 await __yield();
 /* ---------------- textures (generated at high resolution) ---------------- */
 function canvasTex(size, draw, { repeat = 1, srgb = true } = {}){
-  const c = document.createElement('canvas'), px = MOBILE ? Math.min(size, 768) : size; c.width = c.height = px; const g0 = c.getContext('2d'); if (px !== size) g0.scale(px/size, px/size); // phones: same drawing at a lighter resolution
+  const c = document.createElement('canvas'), px = MOBILE ? Math.min(size, LITEG ? 512 : 768) : size; c.width = c.height = px; const g0 = c.getContext('2d'); if (px !== size) g0.scale(px/size, px/size); // phones: same drawing at a lighter resolution
   // iPhones cap the total memory of all canvases on a page; scratch canvases used while drawing are emptied right away
   const made = [], ce = document.createElement; document.createElement = function(t, o){ const e = ce.call(document, t, o); if (String(t).toLowerCase() === 'canvas') made.push(e); return e; };
   try { draw(g0, size); } finally { document.createElement = ce; }
@@ -1471,6 +1490,7 @@ const gemMats = GEMS.map(([, c, , kind]) => {
 function gemMesh(i, s = 1){ const kind = GEMS[i][3], gi = kind === 'pearl' ? 4 : (kind === 'opaque' || kind === 'band') ? (i % 2 ? 1 : 4) : i % 4; const m = new THREE.Mesh(GEM_GEOS[gi], gemMats[i]); m.scale.setScalar(s); return m; }
 
 const POND = { x: 42, z: 48, r: 15 };
+solidCircle(POND.x, POND.z, POND.r + .4);   // nobody walks into the wish pond
 const pondMirror = new Reflector(new THREE.CircleGeometry(POND.r, 96), { textureWidth: 512, textureHeight: 512, color: 0xb0a2bf, clipBias: .003 });
 pondMirror.rotation.x = -Math.PI/2; pondMirror.position.set(POND.x, .06, POND.z); scene.add(pondMirror);
 const pondFallback = new THREE.Mesh(new THREE.CircleGeometry(POND.r, 96), new THREE.MeshPhysicalMaterial({ color: 0x3a2c4a, roughness: .04, metalness: .7, clearcoat: 1 }));
@@ -1878,7 +1898,7 @@ function twinkle(mat){ const prev = mat.onBeforeCompile;
   if (uBreath > 0.0){ gl_FragColor.rgb *= mix(1.0, .62 + .62*vBr, uBreath); float warm = step(.86, vTh)*(.5 + .5*sin(uT*.35 + vTh*50.0)); gl_FragColor.rgb = mix(gl_FragColor.rgb, vec3(1.0, .92, .62)*(.8 + .5*vBr), warm*.55*uBreath); }`); };
   mat.customProgramCacheKey = () => 'twk' + (mat.uuid); return mat; }
 const treeLeafMat = twinkle(snowable(new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false })));
-const NLEAF = MOBILE ? 7000 : 14000, NHANG = MOBILE ? 200 : 380, HPER = 14;
+const NLEAF = LITEG ? 4200 : MOBILE ? 7000 : 14000, NHANG = LITEG ? 130 : MOBILE ? 200 : 380, HPER = 14;
 const treeLeaves = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.13, 0), treeLeafMat, NLEAF);
 const treeDrape = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(.1, 0), treeLeafMat, NHANG*HPER);
 const crystalLeaves = new THREE.InstancedMesh((() => { const g = new THREE.OctahedronGeometry(.32, 0); g.scale(.55, 1.4, .3); return g; })(), twinkle(new THREE.MeshPhysicalMaterial({ color: 0xffffff, emissive: 0x6a7ad8, emissiveIntensity: .5, roughness: .05, iridescence: 1, iridescenceIOR: 1.6, transparent: true, opacity: .88, toneMapped: false })), MOBILE ? 1400 : 2600);
@@ -2217,7 +2237,7 @@ const grassGeo = (() => {
   }
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(nrm, 3)); g.setAttribute('bladeH', new THREE.Float32BufferAttribute(h, 1)); return g;
 })();
-const NGRASS = MOBILE ? 22000 : 60000;
+const NGRASS = LITEG ? 8000 : MOBILE ? 22000 : 60000;
 const grass = new THREE.InstancedMesh(grassGeo, grassMat, NGRASS);
 {
   const o = new THREE.Object3D(), c = new THREE.Color(); let n = 0;
@@ -2237,7 +2257,7 @@ flowerTex.wrapS = flowerTex.wrapT = THREE.ClampToEdgeWrapping;
 const flowerGlow = canvasTex(128, (g, s) => { g.fillStyle = '#000'; g.fillRect(0, 0, s, s); const r = g.createRadialGradient(s/2, s/2, 0, s/2, s/2, s*.16); r.addColorStop(0, '#fff'); r.addColorStop(1, '#000'); g.fillStyle = r; g.fillRect(0, 0, s, s); });
 flowerGlow.wrapS = flowerGlow.wrapT = THREE.ClampToEdgeWrapping;
 const flowerMat = addGlow(new THREE.MeshStandardMaterial({ map: flowerTex, emissive: 0xfff2c0, emissiveMap: flowerGlow, emissiveIntensity: 1.2, alphaTest: .45, side: THREE.DoubleSide, roughness: .7 }), 1.1);
-const NFLOW = MOBILE ? 1800 : 4200;
+const NFLOW = LITEG ? 1000 : MOBILE ? 1800 : 4200;
 const flowers = new THREE.InstancedMesh(new THREE.PlaneGeometry(.42, .42), flowerMat, NFLOW);
 {
   const o = new THREE.Object3D(), c = new THREE.Color(); let n = 0;
@@ -2255,7 +2275,7 @@ const babyTex = canvasTex(128, (g, s) => { for (let i=0;i<70;i++){ const a = rnd
 babyTex.wrapS = babyTex.wrapT = THREE.ClampToEdgeWrapping;
 const babyMat = new THREE.MeshStandardMaterial({ map: babyTex, alphaTest: .4, side: THREE.DoubleSide, roughness: .8, emissive: 0xffffff, emissiveIntensity: .12 });
 const babyGeo = (() => { const a = new THREE.PlaneGeometry(.9, .9); a.translate(0, .45, 0); const b = a.clone(); b.rotateY(Math.PI/2); return mergeGeometries([a, b]); })();
-const NBABY = MOBILE ? 1600 : 3600;
+const NBABY = LITEG ? 900 : MOBILE ? 1600 : 3600;
 const babys = new THREE.InstancedMesh(babyGeo, babyMat, NBABY);
 const weeds = (() => {
   const geo = (() => { const pos = [], nrm = [];
@@ -2270,10 +2290,10 @@ const mapleTex = canvasTex(128, (g, s) => { g.translate(s/2, s/2); g.fillStyle =
   g.strokeStyle = 'rgba(0,0,0,.25)'; g.lineWidth = 2; g.beginPath(); g.moveTo(0, s*.42); g.lineTo(0, -s*.4); g.moveTo(0, 0); g.lineTo(s*.36, -s*.18); g.moveTo(0, 0); g.lineTo(-s*.36, -s*.18); g.stroke(); });
 mapleTex.wrapS = mapleTex.wrapT = THREE.ClampToEdgeWrapping;
 const mapleMat = new THREE.MeshStandardMaterial({ map: mapleTex, alphaTest: .45, side: THREE.DoubleSide, roughness: .8 });
-const NMAPLE = MOBILE ? 4000 : 9000;
+const NMAPLE = LITEG ? 2200 : MOBILE ? 4000 : 9000;
 const maples = new THREE.InstancedMesh(new THREE.PlaneGeometry(.38, .38), mapleMat, NMAPLE);
 const snowMoundMat = new THREE.MeshStandardMaterial({ color: 0xf6f9ff, roughness: .85, normalMap: snowNormal, normalScale: new THREE.Vector2(.6, .6) });
-const NMOUND = MOBILE ? 700 : 1500;
+const NMOUND = LITEG ? 400 : MOBILE ? 700 : 1500;
 const mounds = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 16, 8, 0, Math.PI*2, 0, Math.PI/2), snowMoundMat, NMOUND);
 {
   const o = new THREE.Object3D(), c = new THREE.Color(); let n;
@@ -4043,7 +4063,9 @@ const PLACES = [
   const grid = $('placesGrid');
   const SHOW = PAGE === 'cafe' ? ['타로 라운지', '라이브홀'] : PAGE === 'hall' ? ['타로 라운지', '소링카페']
     : ALL ? ['입구', '소원연못', '신성한 나무', '달의 전당', '달의 계단', '기차역', '카드정원', '1:1 상담소', '소링카페', '라이브홀']
-    : PAGE === 'mini' ? ['소원연못', '신성한 나무', '달의 전당', '달의 계단', '카드정원'] : ['소원연못', '신성한 나무', '달의 전당', '달의 계단', '기차역', '1:1 상담소', '소링카페', '라이브홀'];
+    : PAGE === 'mini' ? ['소원연못', '신성한 나무', '달의 전당', '달의 계단', '카드정원'] : ['카드정원', '소원연못', '신성한 나무', '달의 전당', '달의 계단', '기차역', '1:1 상담소', '소링카페', '라이브홀'];
+  if (SOLO) for (let i = SHOW.length - 1; i >= 0; i--) if (['타로 라운지', '소링카페', '라이브홀'].includes(SHOW[i])) SHOW.splice(i, 1);
+  if (!SHOW.length) $('placesBtn').hidden = true;
   for (const name of SHOW){ const [, x, z, lx, lz] = PLACES.find(P => P[0] === name) || [name];
     const b = document.createElement('button'); b.type = 'button';
     const [main, sub] = name.split('\n'); const t = document.createElement('b'); t.style.fontWeight = '400'; t.textContent = main; b.append(t); if (sub){ const sp = document.createElement('span'); sp.textContent = sub; b.append(sp); }
@@ -4075,7 +4097,9 @@ let leavingPage = false;
 const SITE = { cafe: ['소링카페', '카페 안으로 들어가요.', () => CONFIG.CAFE_URL], hall: ['라이브홀', '라이브 방송이 열리는 홀로 들어가요.', () => CONFIG.HALL_URL], lounge: ['밤의 타로 라운지', '정원·소원연못·달의 전당이 있는 라운지예요.', () => CONFIG.LOUNGE_URL] };
 function siteUrl(kind){ try { const u = new URL(SITE[kind][2](), location.href), cur = new URL(location.href).searchParams; for (const k of ['host', 'full']) if (cur.has(k)) u.searchParams.set(k, ''); return u.toString().replace(/=(&|$)/g, '$1'); } catch(_) { return SITE[kind][2](); } }
 let linkShownAt = 0;
-function openLink(kind){ if (!SITE[kind]) return; linkShownAt = Date.now(); $('linkTitle').textContent = SITE[kind][0]; $('linkText').textContent = SITE[kind][1]; const a = $('linkGo'); a.href = siteUrl(kind); a.removeAttribute('target'); a.textContent = '이동하기'; $('linkUrl').textContent = a.href; openSheet('linkSheet'); }
+let soloT = 0;
+function soloNote(){ const n = $('soloNote'); n.hidden = false; n.style.animation = 'none'; void n.offsetWidth; n.style.animation = ''; clearTimeout(soloT); soloT = setTimeout(() => n.hidden = true, 5000); }
+function openLink(kind){ if (SOLO){ if (GARDENISH && (kind === 'cafe' || kind === 'hall')) soloNote(); return; } if (!SITE[kind]) return; linkShownAt = Date.now(); $('linkTitle').textContent = SITE[kind][0]; $('linkText').textContent = SITE[kind][1]; const a = $('linkGo'); a.href = siteUrl(kind); a.removeAttribute('target'); a.textContent = '이동하기'; $('linkUrl').textContent = a.href; openSheet('linkSheet'); }
 // after opening another site in a new tab, this tab lets go of its graphics, sound and connection so the phone has room for the new one
 function sleepTab(){ if (window.__asleep) return; window.__asleep = window.__leaving = true;
   try { if (net.sb) net.sb.removeAllChannels(); } catch(_) {}
@@ -4325,6 +4349,14 @@ document.addEventListener('click', e => { if (!$('setWrap').contains(e.target)) 
 $('treeBtn').addEventListener('click', () => { $('setMenu').hidden = true; $('treeSel').value = treeStyle; openSheet('treeSheet'); });
 $('treeSel').addEventListener('change', () => { if (!live.isHost) return; const k = +$('treeSel').value; hostSave({ treeStyle: k }, true); setTreeStyle(k);
   if (net.sb && !live.previewHost) net.sb.from('lounge_settings').upsert({ key: 'tree', value: String(k) }).then(() => {}, () => {}); toast('신성한 나무', ` 모양을 '${TREE_STYLES[k].name}'(으)로 바꿨어요.`); });
+// 각자 듣는 음악: a visitor can pick the café music for their own screen only (nothing is sent to the server)
+let myCafeMusic = (() => { const v = store.get('tl3-mymusic'); return typeof v === 'number' && v >= 0 && v < CAFE_MUSIC.length ? v : -1; })();
+function renderMyMusic(){ const g = $('myMusicGrid'); g.innerHTML = '';
+  [['카페 기본 음악', -1], ...CAFE_MUSIC.map((n, i) => [n, i])].forEach(([n, i]) => { const b = document.createElement('button'); b.type = 'button'; b.className = myCafeMusic === i ? 'cur' : ''; b.textContent = (myCafeMusic === i ? '♪ ' : '') + n;
+    b.onclick = () => { myCafeMusic = i; store.set('tl3-mymusic', i); renderMyMusic(); toast('음악', ' ' + (i < 0 ? '카페 기본 음악으로 돌아왔어요.' : n + '(으)로 바꿨어요. 내 화면에서만 바뀌어요.')); }; g.appendChild(b); }); }
+$('myMusicBtn').addEventListener('click', () => { renderMyMusic(); openSheet('myMusicSheet'); });
+if (PAGE === 'cafe') $('myMusicBtn').hidden = false;
+if (ALL) setInterval(() => { try { $('myMusicBtn').hidden = !inCafe(me.mesh.position.x, me.mesh.position.z, 0); } catch(_) {} }, 1000);
 function setCafe(m, l){ cafeSet.music = Math.max(0, Math.min(CAFE_MUSIC.length - 1, m | 0)); cafeSet.light = Math.max(0, Math.min(2, l | 0)); $('cafeMusicSel').value = cafeSet.music; $('cafeLightSel').value = cafeSet.light; }
 function saveCafe(){ const m = +$('cafeMusicSel').value, l = +$('cafeLightSel').value; setCafe(m, l); if (!live.isHost) return; hostSave({ cafeMusic: m, cafeLight: l }, true);
   if (net.sb && !live.previewHost) net.sb.from('lounge_settings').upsert({ key: 'cafe', value: m + ',' + l }).then(() => {}, () => {}); toast('소링 카페', ` ${CAFE_MUSIC[m]} · ${CAFE_LIGHT[l]}(으)로 바꿨어요.`); }
@@ -4611,7 +4643,7 @@ const ZONES = {
     } },
   cafe: { verb: .6, // owner picks the style; every pattern is generated here (original, no recordings)
     tick(z, t){
-      const mode = cafeSet.music; if (z.mode !== mode){ z.mode = mode; z.step = 0; z.next = t + .1; }
+      const mode = myCafeMusic >= 0 ? myCafeMusic : cafeSet.music; if (z.mode !== mode){ z.mode = mode; z.step = 0; z.next = t + .1; }
       const tr = CAFE_TRACKS[mode]; if (tr){ playTrack(z, tr[0], tr[1], tr[2]); return; } stopTrack(z);
       const S = CAFE_STYLES[mode] || CAFE_STYLES[0]; while (z.next < t + .6){ S(z, z.step++, z.next); z.next += z.dt || .3; }
     } },
@@ -5442,6 +5474,7 @@ $('introForm').addEventListener('submit', e => {
   $('intro').hidden = true; $('emotes').hidden = false; $('hint').hidden = false; canvas.focus();
   setHud(); startNet(); if (AU.on) auInit(); updateSoundBtn();
   if (PAGE === 'hall') enterHall();
+  setTimeout(() => { window.__lastFrame = performance.now(); window.__started = true; }, 4000);
   if (ALL && MOBILE) toast('소링타로', ' 여기는 PC 버전이에요. 휴대폰에서는 화면이 멈출 수 있어요. 모바일 버전 링크를 이용해 주세요.', 9000);
 });
 $('ownerTry').hidden = !!CONFIG.SUPABASE_URL;
@@ -5504,8 +5537,8 @@ function prunePage(){ if (ALL) return 0; const rm = new Set(), W = new THREE.Vec
 const PRUNED = prunePage();
 if (PAGE === 'garden' || ALL){
   try { scene.remove(hallSign.sp); } catch(_) {}
-  const cl = labelSprite('소링카페', 4.2); cl.position.set(CAFE.x, 17.5, CAFE.z - CAFE.R + 2); scene.add(cl);
-  const hl = labelSprite('라이브홀', 3.6); hl.position.set(PLAT.x, PLAT.y + 5.2, PLAT.z + 8.6); scene.add(hl);
+  { const cl = labelSprite('소링카페', 4.2); cl.position.set(CAFE.x, 17.5, CAFE.z - CAFE.R + 2); scene.add(cl);
+  const hl = labelSprite('라이브홀', 3.6); hl.position.set(PLAT.x, PLAT.y + 5.2, PLAT.z + 8.6); scene.add(hl); }
   // an invisible tap target over the whole café building
   const hit = new THREE.Mesh(new THREE.CylinderGeometry(CAFE.R + .6, CAFE.R + .6, 16, 24), new THREE.MeshBasicMaterial({ visible: false })); if (!ALL){ hit.position.set(CAFE.x, 8, CAFE.z); hit.userData.pick = 'cafelink'; scene.add(hit); pickables.push(hit); }
 }
@@ -5620,7 +5653,7 @@ function perfUnits(){
 function perfCull(){ const cp = camera.position, far = (scene.fog ? scene.fog.far : 400) + 8, W = new THREE.Vector3();
   for (const u of PERF.units){ if (u.dead) continue;
     W.copy(u.lc).applyMatrix4(u.node.matrixWorld); const d = W.distanceTo(cp) - u.r, pad = u.hid ? -6 : 0;
-    const lim = u.far ? u.far + u.r : LITE0 ? (u.r < .6 ? 55 : u.r < 2 ? 85 : u.r < 5 ? 120 : 1e9) : u.r < .6 ? 95 : u.r < 2 ? 150 : u.r < 5 ? 205 : 1e9;
+    const lim = u.far ? u.far + u.r : (LITE0 || LITEG) ? (u.r < .6 ? 55 : u.r < 2 ? 85 : u.r < 5 ? 120 : 1e9) : u.r < .6 ? 95 : u.r < 2 ? 150 : u.r < 5 ? 205 : 1e9;
     const hide = d + pad > far || d + pad > lim;
     if (hide !== u.hid){ u.hid = hide; for (const o of u.list){ o.userData._ch = hide; perfHid(o); } } } }
 function perfReflect(on){ if (!PERF.built) return; const cp = camera.position, W = PERF._w || (PERF._w = new THREE.Vector3());
@@ -5642,7 +5675,7 @@ if (false){ const tryGo = () => { const b = $('goBtn'); if (b && b.dataset.ready
 const clock = new THREE.Clock();
 const v3 = new THREE.Vector3();
 let introT = 0;
-function frame(){
+function frame(){ window.__lastFrame = performance.now();
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
   for (const p of people.values()) p.update(dt, t);
   orbit.rotation.y = t*.12;
