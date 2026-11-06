@@ -659,7 +659,7 @@ function collide(p, rad){
       if (d >= rad) continue;
       if (d > 1e-4){ lx = cx + ex/d*rad; lz = cz + ez/d*rad; } else if (it.hw - Math.abs(lx) < it.hd - Math.abs(lz)) lx = Math.sign(lx || 1)*(it.hw + rad); else lz = Math.sign(lz || 1)*(it.hd + rad);
       p.x = it.x + lx*it.co + lz*it.si; p.z = it.z - lx*it.si + lz*it.co; } } }
-function addSeat(x, y, z, ry, meshes){ const i = SEATS.length; SEATS.push({ x, y, z, ry }); for (const m of meshes) m.traverse(o => { if (o.isMesh){ o.userData.pick = 'seat'; o.userData.seat = i; pickables.push(o); } }); return i; }
+function addSeat(x, y, z, ry, meshes){ const i = SEATS.length; SEATS.push({ x, y, z, ry }); for (const m of meshes) m.traverse(o => { if (o.isMesh){ o.userData.pick = 'seat'; o.userData.seat = i; (o.userData.seats || (o.userData.seats = [])).push(i); pickables.push(o); } }); return i; }
 function addGlow(mat, base){ mat.userData.base = base; glowMats.push(mat); return mat; }
 // winter snow: white settles on upward-facing surfaces of any material passed through snowable()
 const snowU = { value: 0 }, snowCaps = [];
@@ -4152,7 +4152,12 @@ function tap(cx, cy){
   const hw = ray.intersectObjects(walkables.filter(o => o.visible), false)[0];
   if (hp && (!hw || hp.distance <= hw.distance + .5)){
     const kind = hp.object.userData.pick;
-    if (kind === 'seat'){ goSit(hp.object.userData.seatBase !== undefined ? hp.object.userData.seatBase + hp.instanceId : hp.object.userData.seat); return; }
+    if (kind === 'seat'){ let si = hp.object.userData.seatBase !== undefined ? hp.object.userData.seatBase + hp.instanceId : hp.object.userData.seat;
+      // a sofa is one piece with several cushions: take the free cushion nearest to where it was tapped
+      const list = hp.object.userData.seatBase === undefined && hp.object.userData.seats; if (list && list.length > 1){
+        const taken = new Set([...people.values()].filter(p => p !== me && p.seat !== null).map(p => p.seat)), free = list.filter(k => !taken.has(k) && SEATS[k]), pool = free.length ? free : list;
+        const dd = k => (SEATS[k].x - hp.point.x)**2 + (SEATS[k].z - hp.point.z)**2; si = pool.reduce((b, k) => dd(k) < dd(b) ? k : b, pool[0]); }
+      goSit(si); return; }
     if (kind === 'pouch'){ openPouch(); return; }
     if (kind === 'livepouch'){ openPouch(); return; }
     if (kind === 'exit'){ openSheet('exitSheet'); return; }
@@ -5472,7 +5477,7 @@ $('loginGo').addEventListener('click', async () => {
 });
 $('previewHost').addEventListener('click', () => { live.isHost = true; live.previewHost = true; live.state.hostPid = myId; refreshBoss(); if (me){ me.setTarget(HS.x - 3, HS.z, true); me.sitAt(HOST_SEAT); } renderLive(); toast('미리보기', ' 방장 화면이에요. 서버 없이 이 화면에서만 동작해요.'); });
 setInterval(() => { if (live.inHall && live.state.open && live.state.mode === 'cards' && live.state.cards.phase === 'open'){ renderLive(); } }, 500);
-if (window.__TL_TEST) window.__tl = { __load, SEATS, get PERF(){ return PERF; }, get LP(){ return LP; }, focus(x, y, z){ camFocus.set(x, y, z); LP.t = -9; lightPoolFrame(0, 1); }, perfCull, people, renderer, camera, composer, get Q(){ return Q; }, get PAGE(){ return PAGE; }, get PRUNED(){ return [PRUNED, PRUNE_FREED]; }, WALK, AU, SEATS, cafeTables, setTreeStyle, takeItem, gotItem, enterHall, leaveHall, openLiveBok, live, net, hostNext, makeAvatar, scene, openLink, Person, get hallImp(){ return hallImp; }, get pickables(){ return pickables; }, get me(){ return me; }, cam(d, p, y){ camDist = d; camPitch = p; if (y !== undefined) camYaw = y; } };
+if (window.__TL_TEST) window.__tl = { __load, SEATS, get PERF(){ return PERF; }, get LP(){ return LP; }, focus(x, y, z){ camFocus.set(x, y, z); LP.t = -9; lightPoolFrame(0, 1); }, perfCull, people, renderer, camera, composer, get Q(){ return Q; }, get PAGE(){ return PAGE; }, get PRUNED(){ return [PRUNED, PRUNE_FREED]; }, WALK, AU, SEATS, cafeTables, setTreeStyle, takeItem, gotItem, enterHall, leaveHall, openLiveBok, live, net, hostNext, makeAvatar, scene, openLink, Person, tap: (x, y) => tap(x, y), get hallImp(){ return hallImp; }, get pickables(){ return pickables; }, get me(){ return me; }, cam(d, p, y){ camDist = d; camPitch = p; if (y !== undefined) camYaw = y; } };
 
 await __yield();
 /* ---------------- intro ---------------- */
